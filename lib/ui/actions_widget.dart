@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tz/data/cardRepository/card_repository.dart';
 import 'package:tz/data/cardModel/card_model.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:tz/ui/actions_item_widget.dart';
 
 class ActionsWidget extends StatefulWidget {
   const ActionsWidget({Key? key}) : super(key: key);
@@ -12,10 +13,9 @@ class ActionsWidget extends StatefulWidget {
 }
 
 class _ActionsWidgetState extends State<ActionsWidget> {
-  final List<CardModel> _cardsList = [];
+  final List<CardModel> cardsList = [];
   final CardRepositoryImpl _repository = CardRepositoryImpl();
   late final ScrollController _scrollController = ScrollController();
-  bool _loading = false;
 
   @override
   void initState() {
@@ -48,9 +48,17 @@ class _ActionsWidgetState extends State<ActionsWidget> {
           crossAxisCount: 2,
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
-          itemCount: _cardsList.length,
+          itemCount: cardsList.length,
           itemBuilder: (_, int index) {
             return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ActionItemWidget(description: cardsList[index].description),
+                  ),
+                );
+              },
               child: Stack(
                 alignment: Alignment.center,
                 children: <Widget>[
@@ -59,13 +67,13 @@ class _ActionsWidgetState extends State<ActionsWidget> {
                     colorBlendMode: BlendMode.darken,
                     fit: BoxFit.fitHeight,
                     placeholder: (context, url) => const CircularProgressIndicator(),
-                    imageUrl: 'https://bonus.andreyp.ru${_cardsList[index].image}',
+                    imageUrl: 'https://bonus.andreyp.ru${cardsList[index].image}',
                   ),
                   Align(
                     heightFactor: 0.9,
                     alignment: Alignment.center,
                     child: Text(
-                      _cardsList[index].title,
+                      cardsList[index].title,
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),
@@ -78,7 +86,7 @@ class _ActionsWidgetState extends State<ActionsWidget> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
                           Text(
-                            _cardsList[index].shop,
+                            cardsList[index].shop,
                             style: const TextStyle(color: Colors.white),
                           ),
                         ],
@@ -100,9 +108,9 @@ class _ActionsWidgetState extends State<ActionsWidget> {
     newList = await _repository.getCardsPagination();
 
     /// Сделано так, потому что некорректно работает запрос при count > 5
-    _cardsList.addAll(newList);
-    _cardsList.addAll(newList);
-    _cardsList.addAll(newList);
+    cardsList.addAll(newList);
+    cardsList.addAll(newList);
+    cardsList.addAll(newList);
     setState(() {});
   }
 
@@ -112,7 +120,7 @@ class _ActionsWidgetState extends State<ActionsWidget> {
     newList = await _repository.getCardsPagination();
 
     setState(() {
-      _cardsList.addAll(newList);
+      cardsList.addAll(newList);
     });
   }
 
@@ -120,8 +128,9 @@ class _ActionsWidgetState extends State<ActionsWidget> {
     final double nextPageTrigger = _scrollController.position.maxScrollExtent;
 
     if (_scrollController.position.pixels > nextPageTrigger) {
-      _loading = true;
       _getNewCards();
     }
   }
 }
+
+
